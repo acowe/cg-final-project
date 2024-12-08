@@ -9,6 +9,8 @@ uniform highp sampler3D volume;
 uniform highp sampler2D colormap;
 uniform ivec3 volume_dims;
 uniform float dt_scale;
+uniform float thresh;
+uniform bool solid;
 
 in vec3 vray_dir;
 flat in vec3 transformed_eye;
@@ -61,7 +63,17 @@ void main() {
 	vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;
 	for (float t = t_hit.x; t < t_hit.y; t += dt) {
 		float val = texture(volume, p).r;
-		vec4 val_color = vec4(texture(colormap, vec2(val, 0.5)).rgb, val);
+		float op = val;
+		if(thresh == 0.0){
+			op = 1.0;
+		}
+		else if (val < thresh || thresh == 1.0){
+			op = 0.0;
+		}
+		else if (val > thresh && solid){
+			op = 1.0;
+		}
+		vec4 val_color = vec4(texture(colormap, vec2(val, 0.5)).rgb, op);
 		// Opacity correction
 		val_color.a = 1.0 - pow(1.0 - val_color.a, dt_scale);
 		color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb;
@@ -75,9 +87,5 @@ void main() {
     color.r = linear_to_srgb(color.r);
     color.g = linear_to_srgb(color.g);
     color.b = linear_to_srgb(color.b);
-
-	
-
-	//color = vec4(ray_dir, 1.0); 
 
 }

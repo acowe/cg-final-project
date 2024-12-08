@@ -36,6 +36,17 @@ document.getElementById("openfileActionInput").addEventListener('change', async 
     
 });
 
+document.getElementById("sliderVals").addEventListener("input", function() {
+    console.log(this.value);
+    webglapp.setThresh(this.value/100)
+    
+});
+
+document.getElementById("solid").addEventListener("change", function(event) {
+    webglapp.setSolid(event.target.checked) 
+});
+
+
 
 
 

@@ -15,15 +15,23 @@ export class WebGLApp {
         this.indices = box.indices;
         this.last_tick = 0
         this.delta_time = (Date.now() / 1000.0)
-        this.texture = null;
         this.volume = null;
         this.samplingRate = 1.0;
+        this.thresh = 0.0
     }
 
-    createEmpty(){
-        if (this.gl && this.program){
-            this.volume = new Volume(this.gl, this.program);
-        }
+    setThresh(val){
+        this.thresh = val
+        this.gl.useProgram( this.program )
+        this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'thresh' ), this.thresh )
+        this.gl.useProgram( null )
+    }
+
+    setSolid(state_in){
+        this.gl.useProgram( this.program )
+        this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'solid' ), state_in )
+        this.gl.useProgram( null )
+
     }
 
     createVol(){
@@ -91,11 +99,11 @@ export class WebGLApp {
       // Create the WebGL program
       this.program = this.createProgram(this.gl, "./shaders/vol.vert.glsl", "./shaders/vol.frag.glsl");
 
+      this.setThresh(this.thresh)
+
       const gl = this.gl, program = this.program
       this.view = new View(gl, program)
       
-      // Set up the triangle vertices
-      //console.log("verts", vertices)
   
       // Create a buffer and put the vertices data in it
       const vbuffer = gl.createBuffer();

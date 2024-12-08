@@ -8,7 +8,7 @@ export class Volume{
         this.file = filepath
         this.dimensions = dimensions
         this.dataArray = dataArray
-        this.longestAxis = filepath === "" ? 1 : Math.max(dimensions[0],Math.max(dimensions[1], dimensions[2]))
+        this.longestAxis = Math.max(dimensions[0],Math.max(dimensions[1], dimensions[2]))
         this.volScale = [dimensions[0]/this.longestAxis, dimensions[1]/this.longestAxis, dimensions[2]/this.longestAxis]
         this.texture = create3DTexture(gl, dimensions[0], dimensions[1], dimensions[2], dataArray)
         this.colormap = create2DTexture(gl)

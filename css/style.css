@@ -84,3 +84,14 @@ a {
     overflow: scroll;
     background-color: white;
 }
+
+
+.column1{
+    float: left;
+    width: 25%;
+}
+
+.column2{
+    float: right;
+    width: 75%;
+}

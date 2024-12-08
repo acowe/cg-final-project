@@ -22,9 +22,19 @@
                 </div>
             </div>
         </div>
-
-        <div id="canvas-container">
-            <canvas id="canvas"></canvas>
+        <div class="row">
+            <div class="column1">
+                <label>
+                    <input type="checkbox" id="solid" value="solid_opt"> Solid
+                </label>
+                <p>Slider</p>
+                <div class="slidecontainer">
+                    <input type="range" min="0" max="100" value="50" class="slider" id="sliderVals">
+                </div>
+            </div>
+            <div class="column2" id="canvas-container">
+                <canvas id="canvas"></canvas>
+            </div>
         </div>
     </div>
     <noscript>You need to enable JavaScript to view the full site.</noscript>
