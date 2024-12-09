@@ -1,5 +1,8 @@
 #version 300 es
 
+// SOURCE: Will Usher's Volume Rendering Project
+// https://www.willusher.io/webgl/2019/01/13/volume-rendering-with-webgl/#2-gpu-implementation-with-webgl2
+
 in vec3 aPosition;
 
 uniform mat4x4 u_v;

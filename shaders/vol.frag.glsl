@@ -1,7 +1,8 @@
 #version 300 es
 
-// Fragment shaders don't have a default precision so we need
-// to pick one. mediump is a good default. It means "medium precision".
+// SOURCE: Will Usher's Volume Rendering Project
+// https://www.willusher.io/webgl/2019/01/13/volume-rendering-with-webgl/#2-gpu-implementation-with-webgl2
+
 precision highp int;
 precision highp float;
 
