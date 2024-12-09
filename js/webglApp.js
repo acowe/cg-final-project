@@ -34,6 +34,13 @@ export class WebGLApp {
 
     }
 
+    setShadows(state_in){
+        this.gl.useProgram( this.program )
+        this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'shadow' ), state_in )
+        this.gl.useProgram( null )
+
+    }
+
     createVol(){
         let rawMeta = appState.state.rawData
         if(rawMeta){
@@ -99,7 +106,10 @@ export class WebGLApp {
       // Create the WebGL program
       this.program = this.createProgram(this.gl, "./shaders/vol.vert.glsl", "./shaders/vol.frag.glsl");
 
+      this.setSolid(false)
+      this.setShadows(false)
       this.setThresh(this.thresh)
+
 
       const gl = this.gl, program = this.program
       this.view = new View(gl, program)

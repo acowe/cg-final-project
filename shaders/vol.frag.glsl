@@ -6,12 +6,14 @@
 precision highp int;
 precision highp float;
 
+const vec3 light_pos = vec3(1.0, 1.0, 1.0);
 uniform highp sampler3D volume;
 uniform highp sampler2D colormap;
 uniform ivec3 volume_dims;
 uniform float dt_scale;
 uniform float thresh;
 uniform bool solid;
+uniform bool shadow;
 
 in vec3 vray_dir;
 flat in vec3 transformed_eye;
@@ -50,6 +52,42 @@ float wang_hash(int seed) {
 	return float(seed % 2147483647) / float(2147483647);
 }
 
+vec3 computeGradient(in highp sampler3D volumeTexture, vec3 pos, float dt) {
+    //float delta = 0.01; // Small offset for finite differences
+	float delta = dt; // Small offset for finite differences
+    float gx = texture(volumeTexture, pos + vec3(delta, 0, 0)).r -
+               texture(volumeTexture, pos - vec3(delta, 0, 0)).r;
+    float gy = texture(volumeTexture, pos + vec3(0, delta, 0)).r -
+               texture(volumeTexture, pos - vec3(0, delta, 0)).r;
+    float gz = texture(volumeTexture, pos + vec3(0, 0, delta)).r -
+               texture(volumeTexture, pos - vec3(0, 0, delta)).r;
+
+    vec3 gradient = vec3(gx, gy, gz);
+    return normalize(gradient);
+}
+
+vec3 lighting(vec3 normal, vec3 lightDir, vec3 viewDir, float distance, bool shadow) {
+	if (shadow){
+		vec3 color = vec3(1.0, 1.0, 1.0);
+    	vec3 ambient = 0.1 * color;
+
+    	// Diffuse shading
+    	float diff = max(dot(normal, lightDir), 0.0);
+    	vec3 diffuse = 0.6 * diff * color;
+
+    	// Specular shading
+    	vec3 reflectDir = reflect(-lightDir, normal);
+    	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0); // Shininess = 32
+    	vec3 specular = 0.2 * vec3(1.0) * spec;
+
+    	return ambient + (diffuse + specular)/distance;
+	}
+	else{
+		return vec3(1.0);
+	}
+	
+}
+
 void main() {
     vec3 ray_dir = normalize(vray_dir);
 	vec2 t_hit = intersect_box(transformed_eye, ray_dir);
@@ -64,7 +102,13 @@ void main() {
 	vec3 p = transformed_eye + (t_hit.x + offset * dt) * ray_dir;
 	for (float t = t_hit.x; t < t_hit.y; t += dt) {
 		float val = texture(volume, p).r;
+		vec3 normal = computeGradient(volume, p, dt);
+		vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+		float dist = length(transformed_eye - p);
+		vec3 viewDir = normalize(transformed_eye - p);
+
 		float op = val;
+
 		if(thresh == 0.0){
 			op = 1.0;
 		}
@@ -74,10 +118,11 @@ void main() {
 		else if (val > thresh && solid){
 			op = 1.0;
 		}
+
 		vec4 val_color = vec4(texture(colormap, vec2(val, 0.5)).rgb, op);
 		// Opacity correction
 		val_color.a = 1.0 - pow(1.0 - val_color.a, dt_scale);
-		color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb;
+		color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb * lighting(normal, lightDir, viewDir, dist, shadow);
 		color.a += (1.0 - color.a) * val_color.a;
 		if (color.a >= 0.95) {
 			break;
