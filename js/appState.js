@@ -38,6 +38,10 @@ class AppState {
         return this.state.rawFile;
     }
 
+    getDataType(){
+        return this.state.jsonData.dataType;
+    }
+
     // Reset the state
     resetState() {
         this.state = {
