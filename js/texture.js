@@ -1,8 +1,10 @@
-export function create3DTexture(gl, width, height, depth, data) {
+export function create3DTexture(gl, width, height, depth, data, type) {
     const texture = gl.createTexture();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_3D, texture);
-    gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R8, width, height, depth);
+    let glformat = type === "float32" ? gl.R32F : gl.R8,
+    gltype = type === "float32" ? gl.FLOAT : gl.UNSIGNED_BYTE
+    gl.texStorage3D(gl.TEXTURE_3D, 1, glformat, width, height, depth);
     // Set texture parameters
     gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -12,7 +14,7 @@ export function create3DTexture(gl, width, height, depth, data) {
     // Upload data to the texture
     gl.texSubImage3D(gl.TEXTURE_3D, 0, 0, 0, 0,
         width, height, depth,
-        gl.RED, gl.UNSIGNED_BYTE, data);
+        gl.RED, gltype, data);
 
     return texture;
 }
