@@ -31,8 +31,14 @@
                     <input type="checkbox" id="shadows" value="shadows_opt"> Shadows
                 </label>
                 <p>Slider</p>
-                <div class="slidecontainer">
-                    <input type="range" min="0" max="100" value="50" class="slider" id="sliderVals">
+                <div class="TF">
+                    <div class="slidecontainer">
+                        <input type="range" min="0" max="1024" value="50" class="slider" id="sliderVals">
+                    </div>
+                    <div class="image-container">
+                        <img src="colormap/rainbow.png" alt="description of image" id="colormap">
+                        <svg id="svgOverlay" class="overlay"></svg>
+                    </div>
                 </div>
             </div>
             <div class="column2" id="canvas-container">
