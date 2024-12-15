@@ -39,21 +39,6 @@ document.getElementById("openfileActionInput").addEventListener('change', async 
     
 });
 
-document.getElementById("sliderVals").addEventListener("input", function() {
-    webglapp.setThresh(this.value/1024)
-    
-});
-
-document.getElementById("solid").addEventListener("change", function(event) {
-    webglapp.setSolid(event.target.checked)
-    if (event.target.checked){
-        document.getElementById("sliderVals").style.display = "none";
-    }
-    else{
-        document.getElementById("sliderVals").style.display = "block";
-    }
-});
-
 document.getElementById("shadows").addEventListener("change", function(event) {
     webglapp.setShadows(event.target.checked)
 });
