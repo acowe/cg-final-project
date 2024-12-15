@@ -20,10 +20,14 @@ export class WebGLApp {
         this.thresh = 0.0
     }
 
-    setThresh(val){
-        this.thresh = val
+    setOpacity(xmin, xmax, ymin, ymax){
+        this.thresh = xmin
+        console.log(xmin, xmax, ymin, ymax)
         this.gl.useProgram( this.program )
-        this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'thresh' ), this.thresh )
+        this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'x1' ), xmin )
+        this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'x2' ), xmax )
+        this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'y1' ), ymin )
+        this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'y2' ), ymax )
         this.gl.useProgram( null )
     }
 
@@ -44,8 +48,8 @@ export class WebGLApp {
     createVol(){
         let rawMeta = appState.state.rawData
         if(rawMeta){
-            let dims = appState.getDims(), data = appState.getData(), file = appState.getFilepath()
-            this.volume = new Volume(this.gl, this.program, file, dims, data);
+            let dims = appState.getDims(), data = appState.getData(), file = appState.getFilepath(), type = appState.getDataType()
+            this.volume = new Volume(this.gl, this.program, file, dims, data, type);
             this.gl.useProgram( this.program )
             this.gl.uniform1f( this.gl.getUniformLocation( this.program, 'dt_scale' ), this.samplingRate )
             this.gl.useProgram( null )
@@ -92,8 +96,6 @@ export class WebGLApp {
     }
   
     runWebglApp(){
-      let last_tick = Date.now() / 1000.0, delta_time = 0
-
       const canvas = document.getElementById("canvas");
       canvas.addEventListener( 'contextmenu', event => event.preventDefault( ) );
   
@@ -107,8 +109,9 @@ export class WebGLApp {
       this.program = this.createProgram(this.gl, "./shaders/vol.vert.glsl", "./shaders/vol.frag.glsl");
 
       this.setSolid(false)
+      //this.setOpacity(0.0, 1.0, 0.0, 1.0)
       this.setShadows(false)
-      this.setThresh(this.thresh)
+      
 
 
       const gl = this.gl, program = this.program
@@ -155,7 +158,6 @@ export class WebGLApp {
         gl.clearColor(1.0, 1.0, 1.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.useProgram(program);
-        //console.log(this.strip, this.strip.length)
         gl.drawArrays( gl.TRIANGLE_STRIP, 0, this.strip.length / 3 );
         requestAnimationFrame( ( ) =>
         {
