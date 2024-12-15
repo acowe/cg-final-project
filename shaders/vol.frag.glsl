@@ -11,9 +11,13 @@ uniform highp sampler3D volume;
 uniform highp sampler2D colormap;
 uniform ivec3 volume_dims;
 uniform float dt_scale;
-uniform float thresh;
 uniform bool solid;
 uniform bool shadow;
+
+uniform float x1;
+uniform float x2;
+uniform float y1;
+uniform float y2;
 
 in vec3 vray_dir;
 flat in vec3 transformed_eye;
@@ -78,9 +82,9 @@ vec3 lighting(vec3 normal, vec3 lightDir, vec3 viewDir, float distance, bool sha
     	// Specular shading
     	vec3 reflectDir = reflect(-lightDir, normal);
     	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0); // Shininess = 32
-    	vec3 specular = 0.2 * vec3(1.0) * spec;
+    	vec3 specular = 0.1 * vec3(1.0) * spec;
 
-    	return ambient + (diffuse + specular)/distance;
+    	return ambient + diffuse + specular/distance;
 	}
 	else{
 		return vec3(1.0);
@@ -88,13 +92,23 @@ vec3 lighting(vec3 normal, vec3 lightDir, vec3 viewDir, float distance, bool sha
 	
 }
 
+float computeOpacity(float val, float m, float x1, float y1){
+	if(m <= 1.0){
+		return min(1.0, m * val +  y1);
+	}
+	else{
+		return min(1.0,  m * (val - x1));
+	}
+
+}
+
 void main() {
     vec3 ray_dir = normalize(vray_dir);
 	vec2 t_hit = intersect_box(transformed_eye, ray_dir);
+	float m = (y2 - y1)/(x2 - x1);
 	if (t_hit.x > t_hit.y) {
 		discard;
 	}
-
 	t_hit.x = max(t_hit.x, 0.0);
 	vec3 dt_vec = 1.0 / (vec3(volume_dims) * abs(ray_dir));
 	float dt = dt_scale * min(dt_vec.x, min(dt_vec.y, dt_vec.z));
@@ -103,20 +117,17 @@ void main() {
 	for (float t = t_hit.x; t < t_hit.y; t += dt) {
 		float val = texture(volume, p).r;
 		vec3 normal = computeGradient(volume, p, dt);
-		vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+		vec3 lightDir = normalize(ray_dir);
 		float dist = length(transformed_eye - p);
 		vec3 viewDir = normalize(transformed_eye - p);
 
 		float op = val;
-
-		if(thresh == 0.0){
-			op = 1.0;
-		}
-		else if (val < thresh || thresh == 1.0){
+	
+		if (val < x1 || val > x2 ){
 			op = 0.0;
 		}
-		else if (val > thresh && solid){
-			op = 1.0;
+		else {
+			op = computeOpacity(val, m, x1, y1);
 		}
 
 		vec4 val_color = vec4(texture(colormap, vec2(val, 0.5)).rgb, op);
