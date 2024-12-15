@@ -93,13 +93,16 @@ vec3 lighting(vec3 normal, vec3 lightDir, vec3 viewDir, float distance, bool sha
 }
 
 float computeOpacity(float val, float m, float x1, float y1){
-	if(m <= 1.0){
-		return min(1.0, m * val +  y1);
+	if (abs(y1 - y2) < 0.001){
+		if (abs(val - x1) < 0.001) return 1.0;
+		else return 0.0;
+	}
+	if(abs(m) <= 1.0){
+		return (m * (val - x1) +  y1) * val;
 	}
 	else{
-		return min(1.0,  m * (val - x1));
+		return ((1.0/m) * (val - x1) +  x1) * val;
 	}
-
 }
 
 void main() {
